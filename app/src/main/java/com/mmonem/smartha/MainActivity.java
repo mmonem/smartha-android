@@ -1,6 +1,7 @@
 package com.mmonem.smartha;
 
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
@@ -32,14 +33,21 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(Call<State> call, Response<State> response) {
                         Toast.makeText(MainActivity.this, "OK", Toast.LENGTH_SHORT).show();
+                        updateState(response.body());
                     }
 
                     @Override
                     public void onFailure(Call<State> call, Throwable t) {
-                        Toast.makeText(MainActivity.this, "BAD", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
             }
         });
+    }
+
+    private void updateState(State state) {
+        ((TextView)findViewById(R.id.textView)).setText(String.valueOf(state.r1));
+        ((TextView)findViewById(R.id.textView2)).setText(String.valueOf(state.r2));
+        ((TextView)findViewById(R.id.textView3)).setText(String.valueOf(state.t));
     }
 }
