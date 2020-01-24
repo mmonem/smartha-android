@@ -1,6 +1,8 @@
 package com.mmonem.smartha;
 
 import android.view.View;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,39 +17,53 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 
+    private Switch relay1Switch;
+    private Switch relay2Switch;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Gson gson = new GsonBuilder().setLenient().create();
-                Retrofit retrofit = new Retrofit.Builder()
-                        .baseUrl("http://192.168.254.2/")
-                        .addConverterFactory(GsonConverterFactory.create(gson))
-                        .build();
-                EspApi mApi = retrofit.create(EspApi.class);
-                Call<State > call = mApi.load();
-                call.enqueue(new Callback<State>() {
-                    @Override
-                    public void onResponse(Call<State> call, Response<State> response) {
-                        Toast.makeText(MainActivity.this, "OK", Toast.LENGTH_SHORT).show();
-                        updateState(response.body());
-                    }
 
-                    @Override
-                    public void onFailure(Call<State> call, Throwable t) {
-                        Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
+        relay1Switch = findViewById(R.id.relay1);
+
+        relay1Switch.setOnCheckedChangeListener(new Switch.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                setRelay(1, b);
             }
         });
+
+        relay2Switch = findViewById(R.id.relay2);
+
+        relay2Switch.setOnCheckedChangeListener(new Switch.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                setRelay(2, b);
+            }
+        });
+
+
     }
 
-    private void updateState(State state) {
-        ((TextView)findViewById(R.id.textView)).setText(String.valueOf(state.r1));
-        ((TextView)findViewById(R.id.textView2)).setText(String.valueOf(state.r2));
-        ((TextView)findViewById(R.id.textView3)).setText(String.valueOf(state.t));
+    private void setRelay(int number, final boolean state) {
+        String onOff = String.valueOf(state);
+        Gson gson = new GsonBuilder().setLenient().create();
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://192.168.254.2/")
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build();
+        EspApi mApi = retrofit.create(EspApi.class);
+        Call<Void> call = mApi.setRelay(number, state);
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                relay1Switch.setChecked(!state);
+            }
+        });
     }
 }
