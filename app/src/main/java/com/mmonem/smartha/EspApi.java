@@ -5,9 +5,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Path;
 
 public interface  EspApi {
-    @GET("state")
-    Call<State> load();
+    @GET("{number}/")
 
-    @GET("relay/{number}/{state}")
-    Call<Void> setRelay(@Path("number") int number, @Path("state") boolean state);
+    Call<Void> setRelay(@Path("number") int number);
 }
